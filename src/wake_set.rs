@@ -1,7 +1,7 @@
 use crate::lock::{LockExclusiveGuard, LockSharedGuard, RwLock};
-use std::sync::atomic::{AtomicPtr, Ordering};
+use core::sync::atomic::{AtomicPtr, Ordering};
 use uniset::{AtomicBitSet, BitSet};
-
+use alloc::boxed::Box;
 /// A wake set which allows us to immutably set an index.
 pub(crate) struct WakeSet {
     set: AtomicBitSet,
@@ -33,7 +33,7 @@ impl WakeSet {
     }
 
     pub(crate) fn new_raw() -> *mut Self {
-        Box::into_raw(Box::new(Self::new()))
+        alloc::boxed::Box::into_raw(Box::new(Self::new()))
     }
 
     /// Try to lock the current thread until we have unique access.
@@ -43,7 +43,7 @@ impl WakeSet {
 
     pub(crate) fn lock_exclusive(&self) {
         while !self.try_lock_exclusive() {
-            std::sync::atomic::spin_loop_hint();
+            core::sync::atomic::spin_loop_hint();
         }
     }
 
@@ -106,7 +106,7 @@ impl SharedWakeSet {
                 return guard;
             }
 
-            std::sync::atomic::spin_loop_hint();
+            core::sync::atomic::spin_loop_hint();
         }
     }
 

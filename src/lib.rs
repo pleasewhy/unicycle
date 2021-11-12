@@ -1,3 +1,4 @@
+#![no_std]
 #![doc(html_root_url = "https://docs.rs/unicycle/0.6.3")]
 #![deny(missing_docs)]
 #![allow(clippy::needless_doctest_main)]
@@ -158,19 +159,21 @@
 //! [bit sets]: https://docs.rs/uniset/latest/uniset/struct.BitSet.html
 //! [BitSet]: https://docs.rs/uniset/latest/uniset/struct.BitSet.html
 
+extern crate alloc;
 use self::pin_slab::PinSlab;
 use self::wake_set::{SharedWakeSet, WakeSet};
 use self::waker::SharedWaker;
 #[cfg(feature = "futures-rs")]
 use futures_core::{FusedStream, Stream};
-use std::{
+use core::{
     future::Future,
     iter, marker, mem,
     pin::Pin,
     ptr,
-    sync::Arc,
     task::{Context, Poll},
 };
+use alloc::sync::Arc;
+use alloc::boxed::Box;
 use uniset::BitSet;
 
 mod lock;

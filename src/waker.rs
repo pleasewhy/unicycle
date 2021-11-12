@@ -6,12 +6,13 @@
 //!   wake the task from another thread.
 
 use crate::{lock::RwLock, Shared};
-use std::{
+use core::{
     cell::UnsafeCell,
     mem, ptr,
-    sync::Arc,
     task::{Context, RawWaker, RawWakerVTable, Waker},
 };
+use alloc::sync::Arc;
+use alloc::boxed::Box;
 
 /// Wrap the current context in one that updates the local WakeSet.
 /// This takes the shared data by reference and reuses the `INTERNALS_VTABLE`.
