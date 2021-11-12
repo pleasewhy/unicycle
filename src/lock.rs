@@ -1,7 +1,8 @@
+#![no_std]
 #[cfg(not(feature = "parking-lot"))]
 mod internals {
     //! Manual implementation using atomics.
-    use std::sync::atomic::{AtomicIsize, Ordering};
+    use core::sync::atomic::{AtomicIsize, Ordering};
 
     /// A simplified RwLock implementation which only supports voluntary locking.
     #[repr(C)]
@@ -20,25 +21,26 @@ mod internals {
         /// Construct a new lock that is already locked.
         pub fn locked() -> Self {
             Self {
-                state: AtomicIsize::new(-std::isize::MAX),
+                state: AtomicIsize::new(-core::isize::MAX),
             }
         }
 
         /// Try to lock exclusively.
         pub fn try_lock_exclusive_immediate(&self) -> bool {
-            let last = self.state.fetch_sub(std::isize::MAX, Ordering::AcqRel);
+            let last = self.state.fetch_sub(core::isize::MAX, Ordering::AcqRel);
 
             if last != 0 {
                 // try again later
-                self.state.fetch_add(std::isize::MAX, Ordering::AcqRel);
+                self.state.fetch_add(core::isize::MAX, Ordering::AcqRel);
                 return false;
             }
 
-            if last == std::isize::MIN {
+            if last == core::isize::MIN {
                 // Sentinel value in case we observe a value that has wrapped
                 // around. This is such a abnormal state that there's not much
                 // we _can_ do. Abort the process.
-                std::process::abort();
+                // core::process::abort();
+                panic!("try lock exclusive immediate failed.");
             }
 
             true
@@ -46,8 +48,8 @@ mod internals {
 
         /// Unlock shared access.
         pub fn unlock_exclusive_immediate(&self) {
-            let old = self.state.fetch_add(std::isize::MAX, Ordering::AcqRel);
-            debug_assert!(old >= -std::isize::MAX && old < 0);
+            let old = self.state.fetch_add(core::isize::MAX, Ordering::AcqRel);
+            debug_assert!(old >= -core::isize::MAX && old < 0);
         }
 
         /// Try to lock shared.
@@ -59,11 +61,12 @@ mod internals {
                 return false;
             }
 
-            if existing == std::isize::MAX {
+            if existing == core::isize::MAX {
                 // Sentinel value in case we observe a value that has wrapped
                 // around. This is such a abnormal state that there's not much
                 // we _can_ do. Abort the process.
-                std::process::abort();
+                // std::process::abort();
+                panic!("try lock exclusive immediate failed.");
             }
 
             true
